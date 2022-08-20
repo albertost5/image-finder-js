@@ -1,5 +1,10 @@
 import * as UI from './selectors.js';
 
+const imagesPerPage = 50;
+let totalPages; 
+let iterator;
+let currentPage = 1;
+
 function showMessage( message ) {
     const existErrorMessage = document.querySelector('.error');
 
@@ -20,20 +25,23 @@ function clearHtmlElement( htmlElement ) {
     htmlElement.remove();
 }
 
-function searchImages( searchTerm ) {
+function searchImages() {
+
+    const searchTerm = UI.searchInput.value.trim();
     const API_KEY = '29361627-845d1cb16efc30e5edecd20a3';
-    const URL = `https://pixabay.com/api/?q=${searchTerm}&key=${API_KEY}&lang=en&per_page=100`;
+    const URL = `https://pixabay.com/api/?q=${searchTerm}&key=${API_KEY}&lang=en&per_page=${imagesPerPage}&page=${currentPage}`;
 
     fetch(URL)
         .then(response => response.json())
         .then(data => {
+            totalPages = getTotalPages(data.totalHits);
+            console.log({totalPages});
             showImages(data.hits)
         })
         .catch(error => console.log('Error: ', error));
 }
 
 function showImages( imagesArr ) {
-    console.log(imagesArr);
     // Clear the previous content
     UI.resultDiv.textContent = '';
 
@@ -57,6 +65,45 @@ function showImages( imagesArr ) {
         `;
     });
 
+    UI.paginationDiv.textContent = '';
+    
+    printPaginator();
+}
+
+function getTotalPages( totalImages ) {
+    return  Math.ceil(Number(totalImages) / imagesPerPage);
+}
+
+function *createPaginator( total ) {
+    console.log('Generator Init: ', total);
+    for(let i = 1; i <= total; i++) {
+        yield i;
+    }
+}
+
+function printPaginator() {
+   
+    iterator = createPaginator(totalPages);
+    let looping = true;
+
+    do {
+        const { value, done } = iterator.next();
+        if( done ) return;
+
+        const pageRef = document.createElement('a')
+        pageRef.href = '#';
+        pageRef.dataset.page = value;
+        pageRef.textContent = value;
+        pageRef.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'mb-4', 'uppercase', 'rounded', 'font-bold');
+
+        pageRef.onclick = () => {
+            currentPage = value;
+            searchImages();
+        }
+
+        UI.paginationDiv.appendChild(pageRef);
+
+    } while( looping )
 }
 
 

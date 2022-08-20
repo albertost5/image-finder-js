@@ -16,5 +16,5 @@ function validateForm( e ) {
         return;
     }
 
-    searchImages(keyword);
+    searchImages();
 }
