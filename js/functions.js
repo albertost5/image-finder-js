@@ -25,20 +25,29 @@ function clearHtmlElement( htmlElement ) {
     htmlElement.remove();
 }
 
-function searchImages() {
+async function searchImages() {
 
     const searchTerm = UI.searchInput.value.trim();
     const API_KEY = '29361627-845d1cb16efc30e5edecd20a3';
     const URL = `https://pixabay.com/api/?q=${searchTerm}&key=${API_KEY}&lang=en&per_page=${imagesPerPage}&page=${currentPage}`;
 
-    fetch(URL)
-        .then(response => response.json())
-        .then(data => {
-            totalPages = getTotalPages(data.totalHits);
-            console.log({totalPages});
-            showImages(data.hits)
-        })
-        .catch(error => console.log('Error: ', error));
+    try {
+        const response = await fetch(URL);
+        const data = await response.json();
+        totalPages = getTotalPages(data.totalHits); 
+        showImages( data.hits);
+    } catch (error) {
+        console.log('Error: ', error);
+    }
+
+    // fetch(URL)
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         totalPages = getTotalPages(data.totalHits);
+    //         console.log({totalPages});
+    //         showImages(data.hits)
+    //     })
+    //     .catch(error => console.log('Error: ', error));
 }
 
 function showImages( imagesArr ) {
